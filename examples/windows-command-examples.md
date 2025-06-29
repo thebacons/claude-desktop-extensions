@@ -1,4 +1,4 @@
-# Windows Command MCP Server - Usage Examples
+I. Oh, let me. # Windows Command MCP Server - Usage Examples
 
 This document provides practical examples of how to use the Windows Command MCP Server extension with Claude Desktop.
 
