@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude MCP Location Dialog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .location-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(219, 234, 254, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Claude MCP Location Dialog</h1>
+            <p class="text-gray-600">Interactive prototype for smart location detection</p>
+        </div>
+        
+        <!-- Main Dialog Container -->
+        <div id="dialogContainer" class="space-y-6">
+            <!-- Step 1: Initial Detection -->
+            <div id="step1" class="glassmorphism rounded-xl p-6 slide-in">
+                <div class="flex items-center mb-4">
+                    <div class="pulse-dot w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <h2 class="text-xl font-semibold text-gray-800">Detecting your location...</h2>
+                </div>
+                <div class="bg-gray-100 rounded-lg p-4 font-mono text-sm text-gray-700">
+                    <div class="space-y-1">
+                        <div>🌐 Checking IP geolocation...</div>
+                        <div>⏰ Validating timezone settings...</div>
+                        <div>📍 Cross-referencing location data...</div>
+                    </div>
+                </div>
+                <button onclick="simulateDetection()" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    Start Detection
+                </button>
+            </div>
+            
+            <!-- Step 2: Location Results -->
+            <div id="step2" class="hidden glassmorphism rounded-xl p-6 slide-in">
+                <div class="flex items-center mb-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <h2 class="text-xl font-semibold text-gray-800">Location detected!</h2>
+                </div>
+                
+                <div class="location-card rounded-lg p-6 mb-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-3">📍 Primary Detection</h3>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="font-medium">Location:</span> <span id="detectedCity">Stolberg, North Rhine-Westphalia, Germany</span></div>
+                                <div><span class="font-medium">Source:</span> <span class="text-green-600">IP geolocation</span></div>
+                                <div><span class="font-medium">Accuracy:</span> <span class="text-blue-600">~15km radius</span></div>
+                                <div><span class="font-medium">Confidence:</span> <span class="text-green-600 font-medium">High ✅</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-3">🎯 Coordinates</h3>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="font-medium">Latitude:</span> 50.7753°N</div>
+                                <div><span class="font-medium">Longitude:</span> 6.2275°E</div>
+                                <div><span class="font-medium">Timezone:</span> Europe/Berlin (UTC+1)</div>
+                                <div><span class="font-medium">ISP:</span> Deutsche Telekom</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p class="text-blue-800 text-sm">
+                        <strong>For weather queries:</strong> This location provides excellent accuracy for local weather data from the YR API.
+                    </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="confirmLocation()" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center">
+                        ✅ Use this location
+                    </button>
+                    <button onclick="showAlternatives()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center">
+                        🏙️ Nearby cities
+                    </button>
+                    <button onclick="manualEntry()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center">
+                        📍 Enter manually
+                    </button>
+                    <button onclick="openProfileSetup()" class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors flex items-center">
+                        ⚙️ Profile setup
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Alternatives -->
+            <div id="step3" class="hidden glassmorphism rounded-xl p-6 slide-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">🏙️ Choose nearby location</h2>
+                <div class="grid gap-3">
+                    <div class="location-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors" onclick="selectLocation('Stolberg, Germany')">
+                        <div class="font-medium">Stolberg, Germany</div>
+                        <div class="text-sm text-gray-600">Current detection • ~0km • Exact match</div>
+                    </div>
+                    <div class="location-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors" onclick="selectLocation('Cologne, Germany')">
+                        <div class="font-medium">Cologne, Germany</div>
+                        <div class="text-sm text-gray-600">Major city • ~25km east • Better weather station</div>
+                    </div>
+                    <div class="location-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors" onclick="selectLocation('Düsseldorf, Germany')">
+                        <div class="font-medium">Düsseldorf, Germany</div>
+                        <div class="text-sm text-gray-600">Major city • ~35km northeast • International weather data</div>
+                    </div>
+                    <div class="location-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer transition-colors" onclick="selectLocation('Aachen, Germany')">
+                        <div class="font-medium">Aachen, Germany</div>
+                        <div class="text-sm text-gray-600">Regional city • ~15km southwest • Similar climate</div>
+                    </div>
+                </div>
+                <button onclick="goBack()" class="mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                    ← Back to main options
+                </button>
+            </div>
+            
+            <!-- Step 4: Manual Entry -->
+            <div id="step4" class="hidden glassmorphism rounded-xl p-6 slide-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📍 Enter location manually</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search for location</label>
+                        <input type="text" id="locationInput" placeholder="Enter city, address, or coordinates..." 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Examples: "Berlin, Germany" • "40.7128, -74.0060" • "1600 Pennsylvania Avenue"
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="geocodeLocation()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            🔍 Find location
+                        </button>
+                        <button onclick="goBack()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            ← Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Profile Setup -->
+            <div id="step5" class="hidden glassmorphism rounded-xl p-6 slide-in">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">⚙️ Location Profile Setup</h2>
+                <div class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🏠 Home Location</label>
+                            <input type="text" value="Stolberg, Germany" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🏢 Work Location</label>
+                            <input type="text" placeholder="Optional" class="w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🌤️ Default for weather</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option>Home location</option>
+                                <option>Work location</option>
+                                <option>Always ask</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">🎯 Precision level</label>
+                            <select class="w-full p-3 border border-gray-300 rounded-lg">
+                                <option>City level (~10-50km)</option>
+                                <option>Neighborhood (~1-10km)</option>
+                                <option>Exact coordinates</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h3 class="font-medium text-yellow-800 mb-2">🔒 Privacy Settings</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="mr-2">
+                                <span class="text-sm text-yellow-700">Auto-detect location via IP</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" checked class="mr-2">
+                                <span class="text-sm text-yellow-700">Remember location preferences</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2">
+                                <span class="text-sm text-yellow-700">Share location with external APIs</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="saveProfile()" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                            ✅ Save profile
+                        </button>
+                        <button onclick="goBack()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            ← Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6: Confirmation -->
+            <div id="step6" class="hidden glassmorphism rounded-xl p-6 slide-in">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">✅</span>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-2">Location configured!</h2>
+                    <p class="text-gray-600 mb-6">Using <span id="finalLocation" class="font-medium text-blue-600">Stolberg, Germany</span> for your request.</p>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h3 class="font-medium text-blue-800 mb-2">🌤️ Ready for weather query</h3>
+                        <p class="text-sm text-blue-700">Claude can now fetch accurate weather data using the YR API for your location.</p>
+                    </div>
+                    
+                    <button onclick="resetDemo()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        🔄 Try again
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Communication Panel -->
+        <div class="mt-8 glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">💬 Communication with Claude MCP</h3>
+            <div id="communicationLog" class="bg-gray-50 rounded-lg p-4 h-32 overflow-y-auto font-mono text-sm">
+                <div class="text-gray-600">Waiting for user interaction...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let communicationLog = [];
+        
+        function log(message) {
+            communicationLog.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+            updateCommunicationLog();
+        }
+        
+        function updateCommunicationLog() {
+            const logContainer = document.getElementById('communicationLog');
+            logContainer.innerHTML = communicationLog.map(msg => 
+                `<div class="mb-1 ${msg.includes('→') ? 'text-blue-600' : 'text-gray-700'}">${msg}</div>`
+            ).join('');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function showStep(step) {
+            // Hide all steps
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`step${i}`).classList.add('hidden');
+            }
+            // Show target step
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            currentStep = step;
+        }
+        
+        function simulateDetection() {
+            log('MCP Server → Starting IP geolocation...');
+            
+            setTimeout(() => {
+                log('IP API → Location detected: Stolberg, NRW, Germany');
+                log('Timezone → Validating: Europe/Berlin (UTC+1)');
+                log('Cross-validation → High confidence match ✅');
+                log('MCP Server → Presenting results to user');
+                showStep(2);
+            }, 2000);
+        }
+        
+        function confirmLocation() {
+            log('User → Confirmed location: Stolberg, Germany');
+            log('MCP Server → Saving location preference');
+            log('Profile → Updated default location');
+            document.getElementById('finalLocation').textContent = 'Stolberg, Germany';
+            showStep(6);
+        }
+        
+        function showAlternatives() {
+            log('User → Requested alternative locations');
+            log('MCP Server → Showing nearby cities');
+            showStep(3);
+        }
+        
+        function manualEntry() {
+            log('User → Chose manual location entry');
+            log('MCP Server → Opening location input dialog');
+            showStep(4);
+        }
+        
+        function openProfileSetup() {
+            log('User → Opening profile setup');
+            log('MCP Server → Loading profile configuration');
+            showStep(5);
+        }
+        
+        function selectLocation(location) {
+            log(`User → Selected: ${location}`);
+            log('MCP Server → Validating location...');
+            document.getElementById('finalLocation').textContent = location;
+            
+            setTimeout(() => {
+                log('Geocoding → Location validated ✅');
+                log('Profile → Updating preferences');
+                showStep(6);
+            }, 1000);
+        }
+        
+        function geocodeLocation() {
+            const input = document.getElementById('locationInput').value;
+            if (!input) return;
+            
+            log(`User → Manual input: "${input}"`);
+            log('Geocoding API → Looking up coordinates...');
+            
+            setTimeout(() => {
+                log('Geocoding → Location found ✅');
+                log('MCP Server → Confirming with user');
+                document.getElementById('finalLocation').textContent = input;
+                showStep(6);
+            }, 1500);
+        }
+        
+        function saveProfile() {
+            log('User → Saving location profile');
+            log('Profile Manager → Writing USER_PROFILE.md');
+            log('MCP Server → Profile saved successfully ✅');
+            showStep(6);
+        }
+        
+        function goBack() {
+            log('User → Going back to main options');
+            showStep(2);
+        }
+        
+        function resetDemo() {
+            log('User → Resetting demo');
+            communicationLog = [];
+            updateCommunicationLog();
+            log('System → Demo reset, ready for new interaction');
+            showStep(1);
+        }
+        
+        // Initialize
+        log('MCP Dialog System → Ready for location detection');
+    </script>
+</body>
+</html>
