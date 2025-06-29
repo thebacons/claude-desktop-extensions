@@ -1,5 +1,13 @@
 # Session Management Commands for Colin
 
+## 🔴 **CRITICAL: ALWAYS START NEW SESSIONS WITH STATUS CHECK**
+
+**MANDATORY FIRST COMMAND**: `session status`
+**Why**: Understand current limits before proceeding with any work
+**Result**: Clear warning levels and recommendations for session management
+
+---
+
 ## 🎯 **Quick Commands to Control Session**
 
 ### **📊 Check Session Status**
